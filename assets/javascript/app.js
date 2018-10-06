@@ -58,6 +58,7 @@ $( "#add-train-btn" ).on( "click", function(event) {
 
 // 3. Create Firebase event for adding employee to the database and a row in the html when a user adds an entry
 database.ref().on( "child_added", function (childSnapshot){
+
   console.log(childSnapshot.val());
 
   // Store everything into a variable.
@@ -66,6 +67,7 @@ database.ref().on( "child_added", function (childSnapshot){
   var trainDestination = childSnapshot.val().destination;
   var trainStart = childSnapshot.val().start;
   var trainFrequency = childSnapshot.val().frequency;
+
 
   // Employee Info
   console.log(trainName);
@@ -76,11 +78,16 @@ database.ref().on( "child_added", function (childSnapshot){
   // Prettify the employee start
 
   var trainStartPretty = moment.unix(trainStart).format("HH:mm");
+  console.log("this is the " + trainStartPretty);
 
   //Calculate the minutes left using math (I'm scared :'v)
   //To calculate min left
 
-  var minLeft = moment().diff(moment(trainStart, "X"), "min");
+  var firstTimeConverted = moment( trainStart, "HH:mm" ) .subtract (1, "years") ;
+  var minLeft = moment().diff(moment (firstTimeConverted), "minutes") ;
+  var tReminder = minLeft % trainFrequency ;
+  var tMinutesTillTrain = trainFrequency - tReminder ;
+  var nextTrain = moment() .add(tMinutesTillTrain, "minutes");
   console.log(minLeft);
 
   //Create a new row
@@ -89,7 +96,8 @@ database.ref().on( "child_added", function (childSnapshot){
    $( "<td>" ).text(trainName),
    $( "<td>" ).text(trainDestination),
    $( "<td>" ).text(trainStart),
-   $( "<td>" ).text(trainFrequency),
+   $( "<td>" ).text(moment (nextTrain).format("hh:mm")),
+   $( "<td>" ).text(tMinutesTillTrain)
   );
   
   //Append the new row to the table
